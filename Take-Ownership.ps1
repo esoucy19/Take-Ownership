@@ -22,28 +22,30 @@ WARNING: This script is very powerful and very unsafe, use with caution.
 
 By default, the script will run on the current folder.
 
-$Path: The target folder. The script will take ownership of this folder and all
-subfolders. This is ".\" by default.
+$Paths: The target folder. The script will take ownership of this folder and all
+subfolders. The parameter can accept multiple paths. Aliased to "Path".
 
 $User: The user account to grand full control access to. By default this will
 be the current user.
 #>
 [CmdletBinding()]
 Param(
-[String]
-$Path = ".\",
-[String]
-$User = "$env:UserDomain\$env:UserName"
+    [Parameter(Mandatory=$true)]
+    [Alias("Path")]
+    [String[]]$Paths,
+    [String]$User = "$env:UserDomain\$env:UserName"
 )
 
 Begin{}
 
 Process{
-    $exitcode = 1
-    while ($exitcode -ne 0) {
-        Start-Process "takeown.exe" -ArgumentList "/R /A /F $Path /D N" -Wait
-        $result = Start-Process "icacls.exe" -ArgumentList "$Path /grant $($User):F /T" -Wait -PassThru
-        $exitcode = $result.ExitCode
+    Foreach ($Path in $Paths) {
+        $ExitCode = 1
+        while ($ExitCode -ne 0) {
+            Start-Process "takeown.exe" -ArgumentList "/R /A /F $Path /D N" -Wait
+            $Result = Start-Process "icacls.exe" -ArgumentList "$Path /grant $($User):F /T" -Wait -PassThru
+            $ExitCode = $Result.ExitCode
+        }
     }
 }
 
