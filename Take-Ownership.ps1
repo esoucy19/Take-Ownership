@@ -22,11 +22,13 @@ WARNING: This script is very powerful and very unsafe, use with caution.
 
 By default, the script will run on the current folder.
 
-$Paths: The target folder. The script will take ownership of this folder and all
+$Paths: The target folder(s). The script will take ownership of this folder and all
 subfolders. The parameter can accept multiple paths. Aliased to "Path".
 
 $User: The user account to grand full control access to. By default this will
 be the current user.
+
+This script now uses a powershell workflow for added speed.
 #>
 [CmdletBinding()]
 Param(
@@ -36,10 +38,13 @@ Param(
     [String]$User = "$env:UserDomain\$env:UserName"
 )
 
-Begin{}
-
-Process{
-    Foreach ($Path in $Paths) {
+Begin{
+    Function TakeOwnership {
+        [CmdletBinding()]
+        Param(
+            [String]$Path,
+            [String]$User
+        )
         $ExitCode = 1
         while ($ExitCode -ne 0) {
             Start-Process "takeown.exe" -ArgumentList "/R /A /F $Path /D N" -Wait
@@ -47,6 +52,28 @@ Process{
             $ExitCode = $Result.ExitCode
         }
     }
+
+    Workflow TakeOwnershipParallel {
+        [CmdletBinding()]
+        Param(
+            [Parameter(Mandatory=$true)]
+            [Alias("Path")]
+            [String[]]$Paths,
+            [String]$User
+        )
+        ForEach -Parallel ($Path in $Paths) {
+            TakeOwnership -Path Path -User $User
+        }
+    }
+
+    $SubPaths = @()
+    ForEach ($Path in $Paths) {
+        $SubPaths += Get-ChildItem -Directory -Path $Path | Select-Object -ExpandProperty FullName
+    }
+}
+
+Process{
+    TakeOwnershipParallel -Path $SubPaths -User $User
 }
 
 End{}
