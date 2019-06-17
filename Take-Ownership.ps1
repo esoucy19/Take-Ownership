@@ -20,8 +20,6 @@ on all folders.
 
 WARNING: This script is very powerful and very unsafe, use with caution.
 
-By default, the script will run on the current folder.
-
 $Paths: The target folder(s). The script will take ownership of this folder and all
 subfolders. The parameter can accept multiple paths. Aliased to "Path".
 
