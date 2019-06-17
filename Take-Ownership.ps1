@@ -15,7 +15,7 @@ will usually encounter a folder we don't have ownership on and fail after
 a partial run. If icacls fails, we rerun takeown, which will take ownership
 of some new folders down the line. We then rerun icacls once again, and so on
 and so forth until icacls finishes with no error message, which will signify
-we've sucessfully taken ownership of and granted out target user permissions
+we've sucessfully taken ownership of and granted our target user permission
 on all folders.
 
 WARNING: This script is very powerful and very unsafe, use with caution.
