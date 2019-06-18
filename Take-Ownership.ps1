@@ -60,7 +60,7 @@ Begin{
             [String]$User
         )
         ForEach -Parallel ($Path in $Paths) {
-            TakeOwnership -Path Path -User $User
+            TakeOwnership -Path $Path -User $User
         }
     }
 
